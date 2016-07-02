@@ -5,7 +5,7 @@
   Include:
   - @all_ratings.each do |rating|
     = rating
-    - if @checked_ratings.include? rating
+    - if session[:checked_ratings].include? rating
       = check_box_tag "ratings[#{rating}]", checked = true, :id => "ratings_#{rating}"
     - else
       = check_box_tag "ratings[#{rating}]", :id => "ratings_#{rating}"
@@ -14,10 +14,10 @@
 %table#movies
   %thead
     %tr
-      %th{:class => @sort_by == 'title' ? 'hilite' : ''}
+      %th{:class => session[:sort_by] == 'title' ? 'hilite' : ''}
         = link_to 'Movie Title', movies_path(:sort_by => 'title'), :id => 'title_header'
       %th Rating
-      %th{:class => @sort_by == 'release_date' ? 'hilite' : ''}
+      %th{:class => session[:sort_by] == 'release_date' ? 'hilite' : ''}
         = link_to 'Release Date', movies_path(:sort_by => 'release_date'), :id => 'release_date_header'
       %th More Info
   %tbody

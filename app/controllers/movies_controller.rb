@@ -11,18 +11,33 @@ class MoviesController < ApplicationController
   end
 
   def index
-    # if no ratings were checked, show all of the ratings
-    if params[:ratings].nil?
-      @checked_ratings = []
-      @ratings_to_show = Movie.all_ratings
-    # Otherwise, show all of the ratings that were checked
-    else
-      @checked_ratings = @ratings_to_show = params[:ratings].keys
+    # Initialize session[] if it does not already have values
+    session[:checked_ratings] ||= Movie.all_ratings
+    session[:sort_by] ||= 'none'
+    
+    # Store parameters in session hash if parameters were given
+    session[:sort_by] = params[:sort_by] unless params[:sort_by].nil?
+    session[:checked_ratings] = params[:ratings].keys unless params[:ratings].nil?
+    
+    # if either of the parameters were missing,
+    # redirect to the URI with the parameters filled in according to session[]
+    if !(params[:sort_by] && params[:ratings])
+      checked_ratings_hash = {}
+      session[:checked_ratings].each do |checked_rating|
+        checked_ratings_hash[checked_rating] = '1'
+      end
+      flash.keep
+      redirect_to movies_path(
+        :sort_by => session[:sort_by], :ratings => checked_ratings_hash
+      )
     end
     
-    @movies = Movie.order(params[:sort_by]).where(:rating => @ratings_to_show)
+    # Set instance variables for the view
+    @movies = Movie.where(:rating => session[:checked_ratings])
+    if session[:sort_by] == 'title' || session[:sort_by] == 'release_date'
+      @movies = @movies.order(session[:sort_by])
+    end
     @all_ratings = Movie.all_ratings
-    @sort_by = params[:sort_by]
   end
 
   def new
