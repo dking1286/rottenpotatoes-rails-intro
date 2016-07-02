@@ -11,12 +11,18 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @sort_by = params[:sort_by]
-    if @sort_by
-      @movies = Movie.order(@sort_by)
+    # if no ratings were checked, show all of the ratings
+    if params[:ratings].nil?
+      @checked_ratings = []
+      @ratings_to_show = Movie.all_ratings
+    # Otherwise, show all of the ratings that were checked
     else
-      @movies = Movie.all
+      @checked_ratings = @ratings_to_show = params[:ratings].keys
     end
+    
+    @movies = Movie.order(params[:sort_by]).where(:rating => @ratings_to_show)
+    @all_ratings = Movie.all_ratings
+    @sort_by = params[:sort_by]
   end
 
   def new
